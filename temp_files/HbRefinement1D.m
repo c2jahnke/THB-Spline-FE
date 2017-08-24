@@ -1,4 +1,4 @@
-    function [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points)
+function [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points)
     % TESTING
     % carefull: cBas, fBas are references which are changed within this
     % function
@@ -65,4 +65,4 @@
     r= size(X,2)-1; % choose only refinement points in refArea
     [Ubar, Qw] = RefineKnotVectCurve(cBas.n,cBas.p,U,Points,X,r); % the curve points Qw are not needed
     
-    end
+end
