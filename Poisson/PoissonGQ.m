@@ -1,13 +1,13 @@
 
-a = 0;
-b = 10;
-N = 10; % number of elements
-p = 2;
+a = -2;
+b = 2;
+N = 4; % number of elements
+p = 1;
 stepS = (b-a)/N;
 basis = bSplBas(a,b,p,N,0.001);
 % thanks to Alex!
 
-f = @(x) sin(x)%.^(1/31);
+f = @(x) (x);%.^(1/31);
 
 Stiffn = zeros(basis.n);
 elStiff = zeros(basis.p +1);
@@ -24,7 +24,7 @@ for k = 1 : N % loop over elements
     for j = 1:length(s) %basis.evalDersBasis(s(j))% not yet fully tested!
         temp = basis.evalDersBasis(s(j));%DersBasisFuns(k,s(j),basis.p,basis.knotVector,1) % replace by method of class!
         bVal(j,:) = temp(1,:);
-        gradVal(j,:) = temp(2,:); % 
+        gradVal(j,:) = temp(2,:);
     end
     
     for l = 1 : basis.p+1
@@ -54,6 +54,7 @@ b(2:end) = rhs;
 %u = pcg(A,b,0.1);
 u = A\b; % use sum u * basis.functions as a curve,
 y = u(2:end);
+
 x = linspace(basis.a,basis.b,basis.n);
 Points = [x' y];
 ImpointCurvePlot(basis.n,basis.sP,basis.p,basis.knotVector,basis.plotVector,Points)

@@ -1,4 +1,4 @@
-classdef bSplBas < handle
+    classdef bSplBas < handle
     %% Class for BSplBas
     % so far contains: Basis generation
     % tablespan

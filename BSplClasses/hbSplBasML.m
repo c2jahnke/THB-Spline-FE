@@ -50,12 +50,41 @@ classdef hbSplBasML < handle
             end    
             x = unique(x);
         end
-        function v = getIndices(obj)
-            % see also lookUpTableSpan
-            v.knotVector = obj.getAllKnots;
-            v.allKnotIndex = [0:length(v.knotVector)];
-            %v.activeKnots = [obj.p : obj.n-1];
-            v.basisFunctionIndex = obj.basisFunctionIndex;
+%         function v = getIndices(obj)
+%             % see also lookUpTableSpan
+%             v.knotVector = obj.getAllKnots;
+%             v.allKnotIndex = [0:length(v.knotVector)];
+%             %v.activeKnots = [obj.p : obj.n-1];
+%             v.basisFunctionIndex = obj.basisFunctionIndex;
+%         end
+        function [lvl, BasisFctInd] = getAllActiveFct(obj)
+            % returns all active basis functions in correct order
+            % just for 2 levels, 
+            % TEST!
+            BasisFctInd = [];
+            lvl = [];
+            fActInd = obj.levelBas{2}.activeIndex;
+            cActInd = obj.levelBas{1}.activeIndex;
+            if(obj.levelBas{1}.refArea(2) == obj.levelBas{1}.b)
+                BasisFctInd = [cActInd fActInd];
+                lvl = [ones(1,length(cActInd)) 2*ones(1,length(fActInd))];
+            elseif(obj.levelBas{1}.refArea(1) == obj.levelBas{1}.a)
+                BasisFctInd = [fActInd cActInd];
+                lvl = [ 2*ones(1,length(fActInd)) ones(1,length(cActInd))];
+            else
+            for k = 1 : length(cActInd)-1
+                BasisFctInd = [BasisFctInd k-1];
+                lvl = [lvl 1];
+                if(k < cActInd(k+1))
+                    BasisFctInd = [BasisFctInd fActInd];
+                    lvl = [lvl 2*ones(1,length(fActInd))];
+                    k = (k+1);
+                    break
+                end
+            end
+            BasisFctInd = [BasisFctInd cActInd(k:end)];
+            lvl = [lvl ones(1,length(cActInd(k:end)))];
+            end
         end
         
         

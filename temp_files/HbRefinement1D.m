@@ -7,6 +7,7 @@ function [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points)
     if(isempty(refArea))
         Ubar = cBas.knotVector;
         Qw = Points;
+        fBas.activeIndex = [];
         return;
     end
     cBas.refArea = refArea;
@@ -57,7 +58,7 @@ function [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points)
     h0 = cBas.knotspan;
     h1 = fBas.knotspan;
     
-    assert(~(refArea(end) - refArea(1) < cBas.p*h1),'Error: Omega1 to small for one basis function.');
+    %assert(~(refArea(end) - refArea(1) < cBas.p*h1),'Error: Omega1 to small for one basis function.');
 
 
     % box aligned refinement
