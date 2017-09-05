@@ -1,8 +1,8 @@
 clc, clear all, close all
-a = -2;
-b = 2;
+a = -1;
+b = 1;
 p = 1;
-N = 10;
+N = 2;
 resol = 0.001;
 lvl = 2;
 obj = hbSplBasML(a,b,p,N,resol,lvl);
@@ -13,7 +13,7 @@ Points(:,1) = linspace(0,10, size(Points,1) );
 Points(:,2) = f(2*pi*Points(:,1));
 
 
-refArea = [0 2];
+refArea = [0 1];
 [U, Ubar, ~, Qw] = HbRefinement1D(obj.levelBas{1},obj.levelBas{2},refArea,Points);
 
 if(isempty(refArea))
@@ -28,7 +28,7 @@ Stiffn = zeros(length(obj.levelBas{1}.activeIndex) +length(obj.levelBas{2}.activ
 elStiff = zeros(obj.levelBas{1}.p +2); % 
 % Ax = b
 % Lapl(u) = f
-ngp = obj.levelBas{1}.p+3;
+ngp = obj.levelBas{1}.p+7;
 
 rhs = zeros(nOF,1); % basis.n number of basis functions!
 elRhs =  zeros(obj.levelBas{1}.p+2,1);
@@ -133,16 +133,16 @@ y =  u(2:end+1-obj.levelBas{1}.p);
 % [lvl, BasisFctInd] = obj.getAllActiveFct;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % hackfix for p = 1 and f(x) = @(x) x;
-ind_cnt = p-1;
-for k = 1 : length(allKnots)
-    if(refArea(1) < allKnots(k))
-        ind_cnt = ind_cnt+1;
-        break;
-    else
-        ind_cnt = ind_cnt +1;
-    end
-end
-y(ind_cnt) = y(ind_cnt) + 8/6; % how does this make sense?
+% ind_cnt = p-1;
+% for k = 1 : length(allKnots)
+%     if(refArea(1) < allKnots(k))
+%         ind_cnt = ind_cnt+1;
+%         break;
+%     else
+%         ind_cnt = ind_cnt +1;
+%     end
+% end
+% y(ind_cnt) = y(ind_cnt) + 8/6; % how does this make sense?
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 x = Ubar(obj.levelBas{1}.p+1:end -obj.levelBas{1}.p);
