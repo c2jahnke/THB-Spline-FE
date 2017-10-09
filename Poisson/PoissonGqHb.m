@@ -1,4 +1,4 @@
-clc, clear all, close all
+%clc, clear all, close all
 a = -1;
 b = 1;
 p = 1;
@@ -6,66 +6,65 @@ N = 2;
 resol = 0.001;
 lvl = 2;
 obj = hbSplBasML(a,b,p,N,resol,lvl);
-f = @(x) (x);%.^(1/31); %(x).^(1/3);
+f = @(x) 1;%pi.^2/4*sin(pi/2*x);%sin(x); 
+dBC = 0;% Dichlet BC
     % change generation of Points!
-Points = zeros(obj.levelBas{1}.n,2); % not needed
-Points(:,1) = linspace(0,10, size(Points,1) );
-Points(:,2) = f(2*pi*Points(:,1));
+Points = zeros(obj.levelBas{1}.n,2); % needed, just for Refinement
 
 
 refArea = [0 1];
-[U, Ubar, ~, Qw] = HbRefinement1D(obj.levelBas{1},obj.levelBas{2},refArea,Points);
+obj.HbRefinement1DML(1,refArea,f);
+% refArea2 = [2 4];
+% [U, Ubar, ~, ~] = obj.HbRefinement1DML(2,refArea2,f);
+% obj.HbRefinement1DML(1,refArea,f);
 
 if(isempty(refArea))
     nOE = N;
     nOF = obj.levelBas{1}.n;
 else
-    %% not correct for p > 1
+    % not correct for p > 1
 nOF = length(obj.levelBas{1}.activeIndex) +length(obj.levelBas{2}.activeIndex); % number o functions
 nOE =nOF - p; % number of elements
 end
-Stiffn = zeros(length(obj.levelBas{1}.activeIndex) +length(obj.levelBas{2}.activeIndex)); %basis.n % length(cBas.activeIndex) +length(fBas.activeIndex) 
-elStiff = zeros(obj.levelBas{1}.p +2); % 
-% Ax = b
-% Lapl(u) = f
-ngp = obj.levelBas{1}.p+7;
-
-rhs = zeros(nOF,1); % basis.n number of basis functions!
-elRhs =  zeros(obj.levelBas{1}.p+2,1);
-%allKnots = basis.getAllKnots;
+Stiffn = zeros(nOF); %basis.n % length(cBas.activeIndex) +length(fBas.activeIndex) 
+ngp = max(obj.levelBas{1}.p+1,sqrt(obj.levelBas{1}.p^2 -2*obj.levelBas{1}.p+1));
+% first part to integrate right hand side sufficiently accurate, second
+% part to generate stiffness matrix exactly
+rhs = zeros(nOF,1); % number of basis functions!
 allKnots = unique(obj.getAllKnots);
 
-% number of elements: N+(refArea(2) - refArea(1))/cBas.knotspan
+iLvl = zeros(1,nOF); % save indices of stiffness matrix
+iBasisFctInd = zeros(1,nOF);
+
 for el = 1 : nOE % loop over elements
     [s,w]=lgwt(ngp,allKnots(el),allKnots(el+1));
-    bVal = []; % zeros(ngp, basis.p+1); % basis evaluation
-    gradVal = []; % zeros(ngp,basis.p+1); % derivative evaluation
-    for j = length(s):-1:1 %basis.evalDersBasis(s(j))% not yet fully tested!
-        temp = obj.evalDersBasis(s(j)) %DersBasisFuns(k,s(j),basis.p,basis.knotVector,1) % replace by method of class!
+    bVal = []; % basis evaluation
+    gradVal = []; % derivative evaluation
+    for j = length(s):-1:1 
+        temp = obj.evalDersBasis(s(j)); %DersBasisFuns(k,s(j),basis.p,basis.knotVector,1) % replace by method of class!
         [lvl, Ind] = obj.getActiveFctIndU(s(j));
         lIndex = [lvl ; Ind];
         
         bVal(j,:) = temp(1,:);
         gradVal(j,:) = temp(2,:); % 
     end
-    
-    elRhs = zeros(size(bVal,2),1); % dynamic
+    elRhs = zeros(size(bVal,2),1); 
     elStiff = zeros(size(bVal,2));
     elSInd = cell(size(bVal,2));
     elRInd =cell(size(bVal,2),1);
-    for ii = 1 : size(bVal,2) % cBas.p+1
-        elRhs(ii) = sum(w.*f(s).*bVal(:,ii))
-        elRInd{ii} = lIndex(:,ii);
-        elStiff(ii,ii) = sum(w.*gradVal(:,ii).^2);
-        elSInd{ii,ii} = [lIndex(:,ii) lIndex(:,ii)];
-        for jj = ii+1 : size(bVal,2) % cBas.p +1
-            elStiff(ii,jj) = sum(w.*gradVal(:,ii).*gradVal(:,jj));
-            elSInd{ii,jj} = [lIndex(:,ii) lIndex(:,jj)];
-            elStiff(jj,ii) = elStiff(ii,jj);
-            elSInd{jj,ii} = elSInd{ii,jj};
+    for ii0 = 1 : size(bVal,2) % cBas.p+1
+        elRhs(ii0) = sum(w.*f(s).*bVal(:,ii0));
+        elRInd{ii0} = lIndex(:,ii0);
+        elStiff(ii0,ii0) = sum(w.*gradVal(:,ii0).^2);
+        elSInd{ii0,ii0} = [lIndex(:,ii0) lIndex(:,ii0)];
+        for jj = ii0+1 : size(bVal,2) 
+            elStiff(ii0,jj) = sum(w.*gradVal(:,ii0).*gradVal(:,jj));
+            elSInd{ii0,jj} = [lIndex(:,ii0) lIndex(:,jj)];
+            elStiff(jj,ii0) = elStiff(ii0,jj);
+            elSInd{jj,ii0} = elSInd{ii0,jj};
         end      
     end
-    
+    % generation of element stiffness matrix and of index matrix done!
     
 
     for l = 1 : obj.level
@@ -73,17 +72,19 @@ for el = 1 : nOE % loop over elements
             if(l >1)
             ind_1 = length(obj.levelBas{l-1}.activeIndex) +k+1;
             else
-                ind_1 = k+1;
+                ind_1 = k+1; % index for basis functions
             end
-            for ii = 1 : size(bVal,2)
-                if(elRInd{ii} == [l;obj.levelBas{l}.activeIndex(k+1)])
-                    [l;obj.levelBas{l}.activeIndex(k+1)]
-                   rhs(ind_1) = rhs(ind_1) + elRhs(ii)
+            for ii1 = 1 : size(bVal,2)
+                if(elRInd{ii1} == [l;obj.levelBas{l}.activeIndex(k+1)])
+                    
+                   rhs(ind_1) = rhs(ind_1) + elRhs(ii1);
+                   iLvl(ind_1) = l;
+                   iBasisFctInd(ind_1) = obj.levelBas{l}.activeIndex(k+1);
                 end
              end
             
             for ll = l : obj.level
-                for kk = 0:length(obj.levelBas{ll}.activeIndex)-1 % true?
+                for kk = 0:length(obj.levelBas{ll}.activeIndex)-1 
                     if(ll >1)
                     ind_2 = length(obj.levelBas{ll-1}.activeIndex) +kk+1;
                     else
@@ -91,11 +92,9 @@ for el = 1 : nOE % loop over elements
                     end
                     for  ii = 1 : size(bVal,2)
                         for jj = ii : size(bVal,2)
-  
-
                         if(elSInd{ii,jj} == [l ll; obj.levelBas{l}.activeIndex(k+1)...
                                 obj.levelBas{ll}.activeIndex(kk+1)])
-                            elStiff(ii,jj) = elStiff(ii,jj);
+               
                             Stiffn(ind_1,ind_2) = Stiffn(ind_1,ind_2) + elStiff(ii,jj);
                             Stiffn(ind_2,ind_1) = Stiffn(ind_1,ind_2);
                         end
@@ -107,7 +106,8 @@ for el = 1 : nOE % loop over elements
     end
     
 end
-% Stiffn seems correct
+% reorder stiffness matrix and rhs to enforce boundary conditions
+% only if refArea(1) == b
 
 %% BC with Lagrange multipliers
 A = zeros(nOE+obj.levelBas{1}.p +1);
@@ -115,46 +115,18 @@ b = zeros(nOE+obj.levelBas{1}.p +1,1);
 A(1,2) = 1;
 A(2,1) = 1;
 A(2:end,2:end) = Stiffn;
-b(1,1) = 0; % Dichlet BC
+b(1,1) = dBC; % Dichlet BC
 b(2:end) = rhs;
 
-u = A\b; % use sum u * basis.functions as a curve
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% u(4) = u(4) + 8/6;
-% 
-% b_bar= A*u
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-y =  u(2:end+1-obj.levelBas{1}.p);
-%% reorder y
-% [lvl, BasisFctInd] = obj.getAllActiveFct;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% hackfix for p = 1 and f(x) = @(x) x;
-% ind_cnt = p-1;
-% for k = 1 : length(allKnots)
-%     if(refArea(1) < allKnots(k))
-%         ind_cnt = ind_cnt+1;
-%         break;
-%     else
-%         ind_cnt = ind_cnt +1;
-%     end
-% end
-% y(ind_cnt) = y(ind_cnt) + 8/6; % how does this make sense?
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-x = Ubar(obj.levelBas{1}.p+1:end -obj.levelBas{1}.p);
-Points = [x' y];
-% define as method of the class bSplBas, input parameter Points
-hbKnotVector = allKnots;
-for k = 1 : obj.levelBas{1}.p
-    hbKnotVector = [obj.levelBas{1}.a hbKnotVector obj.levelBas{1}.b];
-end % cBas.n
-%% change so that hb-basis is used
-ImpointCurvePlot(nOF,obj.levelBas{1}.sP,obj.levelBas{1}.p,hbKnotVector,obj.levelBas{1}.plotVector,Points)
-
+u = A\b; 
+%u_ord = reorderU(obj,u,nOF,iLvl,iBasisFctInd); % reorder u
+%y =  u_ord(2:end);
+%% reordering is not necessary!
+y = u(2:end);
+uh =  generSol(obj,y);
+hold on;
+g = @(x) sin(pi/2*x);
+%fplot(g,[obj.levelBas{1}.a obj.levelBas{1}.b],'b')
 figure
 obj.levelBas{1}.plotBasisStruct(obj.levelBas{1}.generBasisRed)
 hold on
