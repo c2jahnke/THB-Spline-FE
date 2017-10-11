@@ -1,7 +1,7 @@
 function [THB0, THB1 trunq, q,trP] = ThbRefinement1D(cBas,fBas,refArea,Qw)
     % function evaluation at a small set of points
     % solve basis at p points per element
-    % element boundaries plus subdivide element into p subelements
+    % element boundaries plus subdivide element into p su   belements
     % we need p(p+1) +1 points per B-Spline
     h = fBas.knotspan/fBas.p; 
     solveVector = fBas.a:h:fBas.b-h; % -h, so that no zero line arises for p = 1
@@ -42,17 +42,28 @@ function [THB0, THB1 trunq, q,trP] = ThbRefinement1D(cBas,fBas,refArea,Qw)
     hInd = fBas.getIndexU(refArea(2))-fBas.p;
     
     trunq(lInd:hInd,:) = 0;
-
+    % set index truncIndex
+    redTrunqDiff = abs(sum(trunq -q));
+    truncIndex = [];
+    for k = 1 : cBas.n
+        if(redTrunqDiff(k) > 0 )
+            truncIndex = [truncIndex k-1];
+        end
+    end
+    cBas.truncIndex = truncIndex;
+    cBas.trunc = trunq;
+    
     THB0 = fBas.generBasis*(trunq);
     THB0(THB0(:) < TOL) = 0;
-    THB1 = fBas.generBasisRed;
-    % check if partition of unity property holds
+    THB1 = fBas.generBasisRed(fBas);
+    % check if partition of unity property holds, debugging
     for k = 1 : length(fBas.plotVector)
-        if( abs(sum(THB0(k,:)) + sum(THB1(k,:))-1) > 10e-3 )
+        if( abs(sum(THB0(k,:)) + sum(THB1(k,:))-1) > 10e-3 )          
             disp('Warning, sum(THB0(k,:)) + sum(THB1(k,:)) = ');
             disp(sum(THB0(k,:)) + sum(THB1(k,:)) );
             disp(' for k = ');
             disp(k);
+            disp('Partition of unity is violated.');
         end
     end
     

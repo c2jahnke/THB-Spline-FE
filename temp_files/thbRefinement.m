@@ -1,9 +1,9 @@
 close all, clear all, clc
 a = 0;
 b = 10;
-p = 2;
-N = 10;
-resol = 0.001;
+p = 1;
+N = 5;
+resol = 0.1;
 lvl = 2;
 obj = thbSplBasML(a,b,p,N,resol,lvl);
 
@@ -27,7 +27,7 @@ toc
 % hold off;
 tic
 D = cBas.generBasisRed(fBas);
-disp('Time: ')
+disp('Class refinement: ')
 toc
 
 
@@ -35,6 +35,19 @@ cBas.plotBasisStruct(D);
 hold all
 fBas.plotBasisStruct(fBas.generBasisRed(fBas));
 hold off;
+u = 0.6
+[lvl,BasisFctInd,basVal] = evalBasisLvl(obj,u)
+[lvl,BasisFctInd,basVal] = evalDersBasisLvl(obj,u)
+
+    index = 4;
+    lev = 1;
+    thbML = obj;
+    bT = thbSplBasFun(index,thbML,lev);
+    uh =bT.generOneBasisFun();
+      
+plot(obj.levelBas{1}.plotVector,uh,'r')
+
+% D 2 is not correct
 %% Multiple refinement
 % 
 % cBas =  obj.levelBas{2};

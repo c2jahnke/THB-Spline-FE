@@ -2,13 +2,16 @@ function m20170801main()
     %parameters
     %addpatgit 
     %h('/home/laptop/Documents/_mat_files/')
-    N = 25;
-    basis = bSplBas(0,10,10,N,0.1);
+    N = 5;
+    resol = 0.1;
+    basis = bSplBas(0,10,5,N,resol);
     %par = parameters();
      n = basis.n;
      p = basis.p;
      plotVector = basis.plotVector;
      sP = basis.sP;
+     m = basis.m;
+     knotVector = basis.knotVector;
 %     N = bSplBasFun(2,basis);
 %     nDer = 1;
 % %     n = m - p - 1; % NURBS book: n = m - p -1, number of basis functions
@@ -20,12 +23,12 @@ function m20170801main()
 % %     % The minimum number of control points = p+1 + #(inner points)
 % %     
 % %     %hold off
-% %     %% use 2D surface plots
-% % %      iU = 0;
-% % %      iV = 0;
-% % %      plotOne2Dbasis(p,m,knotVector,iU,iV,plotVector,sP,resol);
-% % %      figure
-% % %       plot2DBasis(p,m,knotVector,plotVector,sP,resol)
+    %% use 2D surface plots
+     iU = 0;
+     iV = 0;
+     plotOne2Dbasis(p,m,knotVector,iU,iV,plotVector,sP,resol);
+     figure
+      plot2DBasis(p,m,knotVector,plotVector,sP,resol)
 
     Omega0 = [basis.a basis.b];
     Omega1 = [basis.a+floor((basis.a+basis.b)/4)+1 basis.b-2];

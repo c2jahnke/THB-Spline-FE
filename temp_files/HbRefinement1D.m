@@ -1,5 +1,4 @@
 function [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points)
-    % TESTING
     % carefull: cBas, fBas are references which are changed within this
     % function
 
@@ -17,7 +16,6 @@ function [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points)
     % private attribute is changed, use setter instead!
     % Problem: 1st knot corresponds p-th index
     % Problem: index corresponds to knots, not to basis functions
-    % maybe add concept of activeKnots! 
      if(cFctStart == cBas.p-1 && cFctEnd==cBas.n - cBas.p)
          cBas.activeIndex = [];
          cBas.activeKnots = [];
@@ -37,6 +35,7 @@ function [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points)
              cBas.knotVector(cFctEnd+cBas.p+1):cBas.knotspan:cBas.knotVector(end-cBas.p)];
          cBas.setCharM();
      end
+     
     fFctStart = fBas.getIndexU(refArea(1)) - 1;
     fFctEnd = fBas.getIndexU(refArea(2)) - fBas.p;
     
@@ -58,7 +57,7 @@ function [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points)
     h0 = cBas.knotspan;
     h1 = fBas.knotspan;
     
-    %assert(~(refArea(end) - refArea(1) < cBas.p*h1),'Error: Omega1 to small for one basis function.');
+    assert(~(refArea(end) - refArea(1) < cBas.p*h1),'Error: Omega1 to small for one basis function.');
 
 
     % box aligned refinement
