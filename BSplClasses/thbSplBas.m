@@ -21,8 +21,8 @@ classdef thbSplBas < hbSplBas
                 obj.sP = size(obj.plotVector,2);
                 obj.m = size(obj.knotVector,2);
                 obj.n = obj.m - obj.p - 1;
-                obj.activeKnots = obj.getAllKnots;
-                obj.activeIndex = [0 : obj.n-1]; % function index
+                obj.activeKnots = [];%obj.getAllKnots;
+                obj.activeIndex = [];%[0 : obj.n-1]; % function index
             function knotVector = ConstrKnotVector(a,b,h1,p)
                 % simple constructor for knot vector
                 temp = (b-a)/h1;
@@ -47,8 +47,8 @@ classdef thbSplBas < hbSplBas
                 for j = obj.activeIndex % plot only active basis functions
                     if (ismember(j,obj.truncIndex))
                        % disp('Truncation necessary')
-                       %obj.trunc(max(1,2*j-floor(obj.p)-1) : min(2*j+floor(obj.p/2),size(obj.trunc(:,j+1))),j)
-                       for k = max(1,2*j-floor(obj.p)) : min(2*j+floor(obj.p/2)+1,size(obj.trunc(:,j+1)))
+                       %carefull, check this condition again!
+                       for k = max(1,2*j-floor(obj.p)) : min(2*j+floor(obj.p/2)+2,size(obj.trunc(:,j+1)))
                             if(obj.trunc(k,j+1) > 0 ) %(p,m,U,i,u)
                                 bas_temp2 = OneBasisFun(fBas.p,fBas.m,fBas.knotVector,k-1,obj.plotVector(i));
                                     C(i,j+1) = C(i,j+1)+ obj.trunc(k,j+1)*bas_temp2(1);
@@ -58,7 +58,6 @@ classdef thbSplBas < hbSplBas
                         end
                         continue;
                     else
-                        %j = j+1; % switch between function index and Matlab index
                         if (j-tableSpan(i) + obj.p  ) < obj.p+1 && tableSpan(i) - j  < obj.p+1
                             tmp = mod(j+1 - startX, (obj.p+1))+1;  % temporary solution
                             C(i,j+1) = bas_temp(1,tmp);
@@ -68,8 +67,33 @@ classdef thbSplBas < hbSplBas
             end
             
          end
+%           function cnt = getIndexU(obj,u) % returns index as in lookUpTableSpan
+%             assert( (obj.a <= u) & (u <= obj.b),'u out of range of knotVector.');
+%             if(u == obj.a) % is this correct?
+%                 cnt = obj.p;
+%                	return 
+%             end
+%             if(u == obj.b)
+%                 cnt = obj.m-obj.p-1;%% work around, think of better one!
+%                 return;
+%             end
+%             left = obj.a;
+%             cnt = 0;
+%             while(u >= left) % changed to >= to get a new index for first 
+%                 cnt = cnt + 1;
+%                 left = obj.knotVector(cnt+2);
+%             end
+%             if (ismember(cnt,obj.truncIndex))
+%                 disp('Truncated function')
+%             end
+%             
+%             
+%         end
+         
+         
+         
          function setCharM(obj) %Not yet fully tested
-              obj.charM = zeros(obj.n, obj.n);
+              obj.charM = sparse(obj.n, obj.n); % instead of zeros
          for k = obj.activeIndex 
                 obj.charM(k+1,k+1) = 1;
          end

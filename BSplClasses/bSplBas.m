@@ -35,12 +35,17 @@
                 obj.resol = resol;
                 
             end
+                if((obj.b==obj.a))
+                    obj.knotspan = 0;
+                else
                 obj.knotspan = (obj.b-obj.a)/obj.N;
                 obj.knotVector = ConstrKnotVector(obj.a,obj.b,obj.knotspan,obj.p);
                 obj.plotVector = [obj.knotVector(1):obj.resol:obj.knotVector(end)];
                 obj.sP = size(obj.plotVector,2);
+                end
                 obj.m = size(obj.knotVector,2);
                 obj.n = obj.m - obj.p - 1;
+                
             function knotVector = ConstrKnotVector(a,b,h1,p)
                 % simple constructor for knot vector
                 temp = (b-a)/h1;
@@ -71,7 +76,7 @@
                 bas_temp = BasisFuns(tableSpan(i),obj.plotVector(i),obj.p,obj.knotVector);
                 for j = 1 : obj.n 
                     if (j-tableSpan(i) + obj.p -1 ) < obj.p+1 && tableSpan(i) +1 - j  < obj.p+1
-                        tmp = mod(j - startX, (obj.p+1))+1;  % temporary solution
+                        tmp = mod(j - startX, (obj.p+1))+1;  % reorder the functions
                         C(i,j) = bas_temp(1,tmp);
                     end
                 end
@@ -84,7 +89,7 @@
         function plotBasisStruct(obj,C)
         %assert(isequal(size(C),[obj.sP,obj.n]),'Warning: Basis structure may not be plottable.');
         for ll = 1:obj.n
-            plot(obj.plotVector,C(:,ll));
+            plot(obj.plotVector,C(:,ll));%,'-k');
             hold all
         end
         hold off
@@ -101,7 +106,7 @@
            % returns all active Basis function derivatives
            x = DersBasisFuns(obj.getIndexU(u),u,obj.p,obj.knotVector,1);
         end
-        % TODO:  Write in a nicer way!TEST!
+        % TODO:  Something is wrong here!
         function cnt = getIndexU(obj,u) % returns index as in lookUpTableSpan
             assert( (obj.a <= u) & (u <= obj.b),'u out of range of knotVector.');
             if(u == obj.a) % is this correct?

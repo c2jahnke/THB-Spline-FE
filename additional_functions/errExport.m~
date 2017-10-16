@@ -1,0 +1,10 @@
+function errExport(H1err,L2err,Enerr,obj)
+ fileName = '/home/laptop/Documents/_mat_files/output/UniformErr.txt';
+ 
+ fileID = fopen(fileName);
+
+ fmt = '%4.0f %4.5f %4.5f %4.5f %4.0f  %5f %4f \n';
+ fprintf(fileID,fmt, [obj.levelBas{1}.N, H1err, L2err, Enerr,  obj.nOF obj.levelBas{1}.refArea]);
+ disp("Error succesfully exported.");
+ fclose(fileID);
+end

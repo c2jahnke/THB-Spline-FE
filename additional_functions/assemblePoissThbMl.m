@@ -18,17 +18,19 @@ rhs = zeros(nOF,1); % number of basis functions!
 
 
 for el = 1 : nOE % loop over elements
-    [s,w]=lgwt(ngp,allKnots(el),allKnots(el+1));
-    bVal = []; % basis evaluation
-    gradVal = []; % derivative evaluation
-    for j = length(s):-1:1 
-        temp = obj.evalDersBasis(s(j)); % method of class to evaluate derivatives!
-        [lvl, Ind] = obj.getActiveFctIndU(s(j));
-        lIndex = [lvl ; Ind];
-        
-        bVal(j,:) = temp(1,:);
-        gradVal(j,:) = temp(2,:); 
-    end
+    %% export evaluation to seperate function
+    [bVal,gradVal,lIndex,s,w] = evalEl(obj,el);
+%     [s,w]=lgwt(ngp,allKnots(el),allKnots(el+1));
+%     bVal = []; % basis evaluation
+%     gradVal = []; % derivative evaluation
+%     for j = length(s):-1:1 
+%         temp = obj.evalDersBasis(s(j)); % method of class to evaluate derivatives!
+%         [lvl, Ind] = obj.getActiveFctIndU(s(j));
+%         lIndex = [lvl ; Ind];
+%         
+%         bVal(j,:) = temp(1,:);
+%         gradVal(j,:) = temp(2,:); 
+%     end
     elRhs = zeros(size(bVal,2),1); 
     elStiff = zeros(size(bVal,2));
     elSInd = cell(size(bVal,2));
@@ -63,7 +65,7 @@ for el = 1 : nOE % loop over elements
             for ii1 = 1 : size(bVal,2)
                 if(elRInd{ii1} == [l;obj.levelBas{l}.activeIndex(k)])
                    rhs(ind_1) = rhs(ind_1) + elRhs(ii1);
-                   iLvl(ind_1) = l; % just for debugging? Delete later on!
+                   iLvl(ind_1) = l; % keep track of all indices
                    iBasisFctInd(ind_1) = obj.levelBas{l}.activeIndex(k);
                 end
              end

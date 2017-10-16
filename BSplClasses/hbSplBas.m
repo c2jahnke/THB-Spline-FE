@@ -23,8 +23,8 @@ classdef hbSplBas < bSplBas
                 obj.sP = size(obj.plotVector,2);
                 obj.m = size(obj.knotVector,2);
                 obj.n = obj.m - obj.p - 1;
-                obj.activeKnots = obj.getAllKnots;
-                obj.activeIndex = [0 : obj.n-1]; % function index
+                obj.activeKnots = [];%obj.getAllKnots;
+                obj.activeIndex = [];%[0 : obj.n-1]; % function index
             function knotVector = ConstrKnotVector(a,b,h1,p)
                 % simple constructor for knot vector
                 temp = (b-a)/h1;
@@ -44,16 +44,18 @@ classdef hbSplBas < bSplBas
                 startX = tableSpan(i) - tableSpan(1) +1;
                 bas_temp = BasisFuns(tableSpan(i),obj.plotVector(i),obj.p,obj.knotVector);
                 for j = obj.activeIndex % plot only active basis functions
-                    j = j+1; % find a nicer way!
-                    if (j-tableSpan(i) + obj.p -1 ) < obj.p+1 && tableSpan(i) +1 - j  < obj.p+1
-                        tmp = mod(j - startX, (obj.p+1))+1;  % temporary solution
+                    %j = j+1; % find a nicer way!
+                    %if (j-tableSpan(i) + obj.p -1 ) < obj.p+1 && tableSpan(i) +1 - j  < obj.p+1
+                    %    tmp = mod(j - startX, (obj.p+1))+1;  
+                    if (j-tableSpan(i) + obj.p) < obj.p+1 && tableSpan(i) - j  < obj.p+1
+                        tmp = mod(j+1 - startX, (obj.p+1))+1;  
                         C(i,j) = bas_temp(1,tmp);
                     end
                 end
             end
             
          end
-         function setCharM(obj) %Not yet fully tested
+         function setCharM(obj) %characteristic matrix
               obj.charM = zeros(obj.n, obj.n);
          for k = obj.activeIndex 
                 obj.charM(k+1,k+1) = 1;

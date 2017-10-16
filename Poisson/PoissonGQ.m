@@ -1,13 +1,13 @@
 
-a = -1;
-b = 1;
-N = 4; % number of elements
-p = 1;
+a = 0;
+b = 10;
+N = 10; % number of elements
+p = 2;
 stepS = (b-a)/N;
-basis = bSplBas(a,b,p,N,0.001);
+basis = bSplBas(a,b,p,N,0.1);
 % thanks to Alex!
 
-f = @   (x) (x);%.^(1/31);
+f = @(x) 3;%.^(1/31);
 
 Stiffn = zeros(basis.n);
 elStiff = zeros(basis.p +1);

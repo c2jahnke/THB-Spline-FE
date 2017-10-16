@@ -1,54 +1,44 @@
 close all, clear all, clc
-a = 0;
-b = 10;
-p = 1;
-N = 5;
+a = -1;
+b = 1;
+p = 3;
+N = 4;
 resol = 0.1;
-lvl = 2;
+lvl = 3;
 obj = thbSplBasML(a,b,p,N,resol,lvl);
 
 f = @(x) sin(x); %(x).^(1/3);
     % change generation of Points!
 Points = zeros(obj.levelBas{1}.n,2); 
+refArea = [-0.5 0.5]; 
 
-cBas = obj.levelBas{1};
-fBas = obj.levelBas{2};
-refArea = [2 8]; 
-%THB0 coarse functions truncated
-tic  
 [THB0, THB1, trunq, q, trP] = obj.ThbRefinement1DML(1,refArea,f); 
-disp('Old refinement: ')
-toc
-%   figure %
-%   hold all
-% for ll = cBas.activeIndex
-%         plot(fBas.plotVector,THB0(:,ll+1)); 
-% end
-% hold off;
-tic
-D = cBas.generBasisRed(fBas);
-disp('Class refinement: ')
-toc
+refArea2 = [-0.25 0.25];
+[THB1_, THB2, trunq2, q2, trP2] = obj.ThbRefinement1DML(2,refArea2,f);
 
+% u = 0.55
+% test = obj.evalBasis(u)
+% [lvl, Ind] = obj.getActiveFctIndU(u)
 
-cBas.plotBasisStruct(D);
-hold all
-fBas.plotBasisStruct(fBas.generBasisRed(fBas));
-hold off;
-u = 0.6
-[lvl,BasisFctInd,basVal] = evalBasisLvl(obj,u)
-[lvl,BasisFctInd,basVal] = evalDersBasisLvl(obj,u)
+obj2 = thbSplBasML(a,b,p,N,resol,2);
+for k = obj.levelBas{1}.activeIndex
+    figure
+plot2DTHB(obj,1,k)
+end
+%plotOne2Dbasis(p,m,knotVector,iU,iV,plotVector,sP,resol)
+a 
+%THB0 coarse functions truncated
+% tic  
+% [THB0, THB1, trunq, q, trP] = obj.ThbRefinement1DML(1,refArea,f); 
+% disp('Old refinement: ')
+% toc
+% 
+% tic
+% D = cBas.generBasisRed(fBas);
+% disp('Class refinement: ')
+% toc
 
-    index = 4;
-    lev = 1;
-    thbML = obj;
-    bT = thbSplBasFun(index,thbML,lev);
-    uh =bT.generOneBasisFun();
-      
-plot(obj.levelBas{1}.plotVector,uh,'r')
-
-% D 2 is not correct
-%% Multiple refinement
+% Multiple refinement
 % 
 % cBas =  obj.levelBas{2};
 % fBas =  obj.levelBas{3};

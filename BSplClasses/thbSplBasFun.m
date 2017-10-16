@@ -59,7 +59,6 @@ classdef thbSplBasFun < thbSplBasML
      
         % readjust this method for THB assembly
         function C = generOneBasisFun(obj)
-            
             if(ismember(obj.index,obj.truncIndex))
                 tmp = obj.trunc(:,obj.index +1);
                 tmp2 = find(tmp);

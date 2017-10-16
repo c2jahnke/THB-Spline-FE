@@ -3,10 +3,11 @@ D = [];
 for ll = 1 : obj.level
     C = zeros(obj.levelBas{ll}.sP,length(obj.levelBas{ll}.activeIndex));
     for l = 1:length(obj.levelBas{ll}.activeIndex)
+        %
         basisF = bSplBasFun(obj.levelBas{ll}.activeIndex(l),obj.levelBas{ll});
         C(:,l) = basisF.generOneBasisFun;
     end
-    D = [D C(1:ll:size(C,1),:)];
+    D = [D C(1:ll:size(C,1),:)];% D = [D C]
 end
 
 uh = y(1)*D(:,1);

@@ -2,11 +2,9 @@ classdef hbSplBasML < handle
     properties %(GetAccess = public, SetAccess = private)    
         levelBas = [];
         basis0 = [];
-        level = 0; %% add variable for the number of active basis functions
-        basisFunctionIndex = [];
-        % boolian has to be set in HbRefinement1D
-        % true if we switch from lower to higher basis
-        % false if we switch from higher to lower basis
+        level = 2; %% add variable for the number of active basis functions
+        nOF = 0;% basisFunctionIndex = [];
+        nOE = 0;
     end
      properties (Hidden = true, SetAccess = private)
         foo = 1
@@ -16,12 +14,16 @@ classdef hbSplBasML < handle
             % constructor for class
             % a, b, p, knotspan, resol
             if nargin >0
-                assert(level >= 1, "The number of levels has to be a positive integer.");
+                assert(level >= 1, 'The number of levels has to be a positive integer.');
             for k = 1 : level
-                obj.levelBas{1,k} = hbSplBas(a,b,p,N*2^(k-1),resol/2^(k-1));
-            end
+                obj.levelBas{1,k} = hbSplBas(a,b,p,N*2^(k-1),resol/2^(k-1)); %resol needed for solution plot!
+            end % set index of level 0 to active
+                obj.levelBas{1}.activeIndex = [0 : obj.levelBas{1}.n-1];
+                obj.levelBas{1}.activeKnots = obj.levelBas{1}.getAllKnots;
                 obj.basis0 = obj.levelBas{1,1};
                 obj.level = level;
+                obj.nOF = obj.levelBas{1}.n;
+                obj.nOE = length(obj.levelBas{1}.getAllKnots) -1;
             end
               
         end
@@ -36,7 +38,7 @@ classdef hbSplBasML < handle
                     x = [x obj.levelBas{k-1}.refArea(1):obj.levelBas{k}.knotspan:obj.levelBas{k-1}.refArea(2)];
                     break;
                     else
-                        x = obj.levelBas{k}.knotVector;
+                        x = unique(obj.levelBas{k}.knotVector);
                         return;
                     end
                 end
@@ -61,6 +63,7 @@ classdef hbSplBasML < handle
             % returns all active basis functions in correct order
             % just for 2 levels, 
             % TEST!
+            % generalize for more levels
             BasisFctInd = [];
             lvl = [];
             fActInd = obj.levelBas{2}.activeIndex;
@@ -104,11 +107,10 @@ classdef hbSplBasML < handle
             basVal = [];
             [lvl, BasisFctInd] = getActiveFctIndU(obj,u);
             for k = 1 : length(BasisFctInd)
-                index = BasisFctInd(k);%p,m,U,i,u
+                index = BasisFctInd(k); % p,m,U,i,u
                 basValues = OneBasisFun(obj.levelBas{lvl(k)}.p,obj.levelBas{lvl(k)}.m,...
                 obj.levelBas{lvl(k)}.knotVector,index,u);
                 basVal = [basVal basValues];
-        
             end
         end
         
@@ -131,17 +133,18 @@ classdef hbSplBasML < handle
         end
         
         function [U, Ubar, Points, Qw] = HbRefinement1DML(obj,rLevel,refArea,f)
-            %Test: hb refinement!
-            % maybe get rid of global index basisFunctionIndex
-            assert(rLevel < obj.level, "Error: rLevel >= obj.level");
+            % Test: hb refinement!
+            % maybe get rid of global index basisFunctionIndex7
+            % function f not needed, as Points are not needed
+            assert(rLevel < obj.level, 'Error: rLevel >= obj.level');
             Points = zeros(obj.levelBas{rLevel}.n,2); % not needed
-            Points(:,1) = linspace(0,10, size(Points,1));
+            Points(:,1) = linspace(obj.levelBas{rLevel}.a,obj.levelBas{rLevel}.b, size(Points,1));
             Points(:,2) = f(2*pi*Points(:,1));
             
             cBas = obj.levelBas{rLevel};
             fBas = obj.levelBas{rLevel+1};
-           [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points);
-           obj.basisFunctionIndex = [1:length(obj.levelBas{rLevel}.activeIndex)+length(obj.levelBas{rLevel+1}.activeIndex)];
+            [U, Ubar, Points, Qw] = HbRefinement1D(cBas,fBas,refArea, Points);
+            % obj.basisFunctionIndex = [1:length(obj.levelBas{rLevel}.activeIndex)+length(obj.levelBas{rLevel+1}.activeIndex)];
         end
      end
 end
