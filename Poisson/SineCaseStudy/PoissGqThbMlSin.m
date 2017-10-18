@@ -1,5 +1,4 @@
 function PoissonGqThbMl(nEL)
-%% There are still a lot of bugs! Test!!
 % [parameters, obj] = param();
 % f = parameters.f;
 % g = parameters.g;
