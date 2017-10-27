@@ -1,5 +1,5 @@
 function y = solveSyst(obj,Stiffn,rhs,iLvl,iBasisFctInd,dBC)
-% maybe put this to other file/function /merge with assembly
+% solve Poisson system
 [sdLvl, sdInd] = obj.getActiveFctIndU(obj.levelBas{1}.a);
 sEval = obj.evalBasis(obj.levelBas{1}.a);
 sIndEval = find(sEval);
@@ -7,7 +7,7 @@ sFLvl = find( sdLvl(sIndEval(1)) == iLvl);
 sFInd = find(sdInd(sIndEval(1)) == iBasisFctInd);
 sInd = intersect(sFLvl,sFInd); % start index
 
-% not nice, but works
+%  works
 [edLvl, edInd] = obj.getActiveFctIndU(obj.levelBas{1}.b-obj.levelBas{1}.resol);
 eEval = obj.evalBasis(obj.levelBas{1}.b-obj.levelBas{1}.resol);
 eIndEval = find(eEval);

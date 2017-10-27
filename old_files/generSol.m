@@ -7,7 +7,7 @@ for ll = 1 : obj.level
         basisF = bSplBasFun(obj.levelBas{ll}.activeIndex(l),obj.levelBas{ll});
         C(:,l) = basisF.generOneBasisFun;
     end
-    D = [D C(1:ll:size(C,1),:)];% D = [D C]
+    D = [D C(1:2^(ll-1):size(C,1),:)];% changed 2^(ll-1) from ll
 end
 
 uh = y(1)*D(:,1);

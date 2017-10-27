@@ -1,15 +1,10 @@
 
-function [Stiffn, rhs, iLvl,iBasisFctInd] = assemblePoissThbMl(obj,refArea,f)
-
+function [Stiffn, rhs, iLvl,iBasisFctInd] = assemblePoissThbMl(obj,f)
 
 allKnots = obj.getAllKnots;
-if(isempty(refArea))
-    nOE = obj.levelBas{1}.N;
-    nOF = obj.levelBas{1}.n;
-end    
+   
 nOF = obj.nOF; % number of functions
 nOE =length(allKnots) -1; % number of elements
-% number of elements seems to change?! erased -p
 Stiffn = zeros(nOF); %basis.n
 ngp = max(obj.levelBas{1}.p+1,sqrt(obj.levelBas{1}.p^2 -2*obj.levelBas{1}.p+1));
 % first part to integrate right hand side sufficiently accurate, second
@@ -20,23 +15,13 @@ rhs = zeros(nOF,1); % number of basis functions!
 for el = 1 : nOE % loop over elements
     %% export evaluation to seperate function
     [bVal,gradVal,lIndex,s,w] = evalEl(obj,el);
-%     [s,w]=lgwt(ngp,allKnots(el),allKnots(el+1));
-%     bVal = []; % basis evaluation
-%     gradVal = []; % derivative evaluation
-%     for j = length(s):-1:1 
-%         temp = obj.evalDersBasis(s(j)); % method of class to evaluate derivatives!
-%         [lvl, Ind] = obj.getActiveFctIndU(s(j));
-%         lIndex = [lvl ; Ind];
-%         
-%         bVal(j,:) = temp(1,:);
-%         gradVal(j,:) = temp(2,:); 
-%     end
+    % assemble element stiffness matrix
     elRhs = zeros(size(bVal,2),1); 
     elStiff = zeros(size(bVal,2));
     elSInd = cell(size(bVal,2));
     elRInd =cell(size(bVal,2),1);
-    for ii0 = 1 : size(bVal,2) % cBas.p+1
-        elRhs(ii0) = sum(w.*f(s).*bVal(:,ii0));
+    for ii0 = 1 : size(bVal,2) 
+        elRhs(ii0) = sum(w.*arrayfun(f,(s)).*bVal(:,ii0)); % changed to arrayfun for non vectorized functions
         elRInd{ii0} = lIndex(:,ii0);
         elStiff(ii0,ii0) = sum(w.*gradVal(:,ii0).^2);
         elSInd{ii0,ii0} = [lIndex(:,ii0) lIndex(:,ii0)];
@@ -50,7 +35,6 @@ for el = 1 : nOE % loop over elements
     % generation of element stiffness matrix and of index matrix done!
     
     % rewrite assembly for arbitrary levels
-    % still not working! Retry!
     for l = 1 : obj.level
         for k = 1:length(obj.levelBas{l}.activeIndex)
             if(l >1) % raise index according to lower levels
@@ -78,7 +62,6 @@ for el = 1 : nOE % loop over elements
                         ind_2 = ind_2 + length(obj.levelBas{tInd}.activeIndex);
                     end
                     ind_2 = ind_2 + kk;
-                    %ind_2 = obj.nOF -length(obj.levelBas{l}.activeIndex) +kk;
                     else
                     ind_2 = kk;
                     end

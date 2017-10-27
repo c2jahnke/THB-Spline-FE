@@ -16,6 +16,6 @@ for k = 2 : obj.nOF
     uh = uh + y(k)*D(:,k);
 end
 
-%plot(obj.levelBas{1}.plotVector(1:end-1),uh(1:end-1),'r')
+plot(obj.levelBas{1}.plotVector(1:end-1),uh(1:end-1),'r')
 
 end
