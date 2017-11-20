@@ -9,7 +9,7 @@
         Nip = 1;
         return
     end
-    if ( u < U(i+1) || u >= U(i+p+2))
+    if ( u < U(i+1) || u >= U(i+p+2))%% changed from 2 to 1
         Nip = 0;
         return
     end
