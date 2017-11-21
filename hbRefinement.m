@@ -1,3 +1,4 @@
+% scratch file for HB-splines
 close all, clear all, clc
 a = 0;
 b = 10;

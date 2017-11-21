@@ -1,3 +1,4 @@
+% scratch file for THB-splines
 close all, clear all, clc
 a = -1;
 b = 1;
